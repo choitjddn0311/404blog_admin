@@ -7,6 +7,7 @@ import PostManagement from "./page/postManageMent";
 import DetailPost from "./page/detailPost";
 import UpdateLog from "./page/updateLog"
 import { useState } from "react";
+import { Charts } from "./page/mainDashboard";
 
 const App = () => {
   const [isOpen, setIsOpen] = useState(true);
@@ -16,11 +17,12 @@ const App = () => {
       <BrowserRouter>
         <SideBar isOpen={isOpen} setIsOpen={setIsOpen}/>
         <Routes>
-          <Route path="/" element={<MainDashboard isOpen={isOpen}/>}></Route>
+          {/* <Route path="/" element={<MainDashboard isOpen={isOpen}/>}></Route> */}
           <Route path="/userList" element={<UserManagement isOpen={isOpen}/>} ></Route>
           <Route path="/postList" element={<PostManagement isOpen={isOpen}/>} ></Route>
           <Route path="/postList/:id" element={<DetailPost/>}></Route>
           <Route path="/UpdateLog" element={<UpdateLog/>}></Route>
+          <Route path="/chart" element={<Charts/>}></Route>
         </Routes>
       </BrowserRouter>
     </>
