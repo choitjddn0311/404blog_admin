@@ -6,7 +6,7 @@ import { IoHome } from "react-icons/io5";
 import { FaUserPen } from "react-icons/fa6";
 import { FaFilePen } from "react-icons/fa6";
 import { IoIosArrowBack,IoIosArrowForward } from "react-icons/io";
-{/* <IoIosArrowForward /> */}
+import { RiListSettingsFill } from "react-icons/ri";
 
 const Aside = styled.aside`
     width: ${(props) => (props.isOpen ? "275px" : "100px")};
@@ -16,7 +16,6 @@ const Aside = styled.aside`
     flex-direction: column;
     justify-content: start;
     gap: 50px;
-    transition: width .3s;
 `;
 
 const AsideToggle = styled.div`
@@ -76,9 +75,9 @@ const AsideMenu = styled.li`
     }
 `
 
-const SideBar = () => {
+const SideBar = ({isOpen, setIsOpen}) => {
     // 열려있기에 상태 true로 저장
-    const [isOpen,setIsOpen] = useState(true);
+    // const [isOpen,setIsOpen] = useState(true);
 
     const toggleSidebar = () => setIsOpen((prev) => !prev)
 
@@ -97,6 +96,9 @@ const SideBar = () => {
                     </AsideMenu>
                     <AsideMenu isOpen={isOpen}>
                         <Link to='/postList'><FaFilePen /><p>게시글 관리</p></Link>
+                    </AsideMenu>
+                    <AsideMenu isOpen={isOpen}>
+                        <Link to='/updateLog'><RiListSettingsFill /><p>업데이트 로그</p></Link>
                     </AsideMenu>
                     <AsideMenu isOpen={isOpen}>
                         <Link to={process.env.REACT_APP_MAIN_PAGE_URL}><IoHome/> <p>메인페이지</p></Link>

@@ -4,7 +4,7 @@ import moment from 'moment';
 
 const Body = styled.div`
     padding: 10px;
-    width: 100%;
+    width: ${(props) => (props.isOpen ? "calc(100% - 250px)" : "calc(100% - 100px)")};
     height: 100vh;
     background: #eee;
     overflow-y: scroll;
@@ -28,7 +28,7 @@ const Td = styled.td`
     text-align: center;
 `;
 
-const PostManagement = () => {
+const PostManagement = ({isOpen}) => {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -56,7 +56,7 @@ const PostManagement = () => {
     }, []);
 
     return (
-        <Body>
+        <Body isOpen={isOpen}>
             <h1>게시글 관리</h1>
             {loading && <p>로딩 중...</p>}
             {error && <p style={{ color: 'red' }}>에러: {error}</p>}
