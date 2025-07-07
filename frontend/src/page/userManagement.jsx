@@ -118,7 +118,7 @@ const UserManagement = () => {
                                 <Td>{user.name}</Td>
                                 <Td>{getGenderKorean(user.gender)}</Td>
                                 <Td>{user.email}</Td>
-                                <Td>{moment(user.created_at).format('YYYY년 MM월 DD일')}</Td>
+                                <Td>{moment(user.created_at).format('YYYY년 MM월 DD일 hh시 mm분 ss초')}</Td>
                             </tr>
                         ))}
                     </tbody>

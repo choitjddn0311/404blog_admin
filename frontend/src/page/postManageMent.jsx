@@ -79,7 +79,7 @@ const PostManagement = () => {
                                 <Td>{post.id}</Td>
                                 <Td>{post.title}</Td>
                                 <Td>{post.post_text}</Td>
-                                <Td>{moment(post.created_at).format('YYYY년 MM월 DD일')}</Td>
+                                <Td>{moment(post.created_at).format('YYYY년 MM월 DD일 hh시 mm분 ss초')}</Td>
                             </tr>
                         ))}
                     </tbody>
