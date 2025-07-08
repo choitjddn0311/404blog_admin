@@ -4,6 +4,7 @@ const cors = require('cors');
 const port = 5001;
 const userManagementRoute = require('./routes/userManagement');
 const postManagementRoute = require('./routes/postManagement');
+const genderAmountRoute = require('./routes/getGenderAmount');
 
 
 // app.get('/' , (req,res) => {
@@ -18,6 +19,7 @@ app.use(cors({
 app.use(express.json());
 app.use('/admin' , userManagementRoute);
 app.use('/admin' , postManagementRoute);
+app.use('/admin' ,genderAmountRoute);
 
 app.listen(port , '0.0.0.0' , () => {
     console.log(`${port}포트에서 돌아가는중`)
