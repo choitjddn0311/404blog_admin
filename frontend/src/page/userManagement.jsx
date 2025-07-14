@@ -1,4 +1,4 @@
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import moment from 'moment';
 
@@ -8,6 +8,10 @@ const Body = styled.div`
     height: 100vh;
     background: #eee;
     overflow-y: scroll;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
 `;
 
 const Table = styled.table`
@@ -28,12 +32,47 @@ const Td = styled.td`
     text-align: center;
 `;
 
+const FixBar = styled.div`
+    position: fixed;
+    bottom: 30px;
+    width: ${(props) => (props.isOpen ? "80%" : "90%")};
+    height: 120px;
+    background: #fff;
+    box-shadow: 0 0 20px #eee;
+    border-radius: 10px;
+    display: ${(props) => (props.visible ? 'block' : 'none')};
+    z-index: 10;
+`;
+
+const Pagination = styled.div`
+    display: flex;
+    gap: 5px;
+    margin-top: 10px;
+    justify-content: center;
+    align-items: center;
+    button {
+        padding: 5px 10px;
+        border: none;
+        background: #ddd;
+        cursor: pointer;
+        &:disabled {
+            background: #aaa;
+            cursor: not-allowed;
+        }
+    }
+`;
+
+
 const UserManagement = ({isOpen}) => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectAll, setSelectAll] = useState(false);
     const [selectedUsers, setSelectedUsers] = useState({});
+    const [currentPage, setCurrentPage] = useState(1);
+    const usersPerPage = 7;
+
+    const selectedCount = Object.values(selectedUsers).filter(Boolean).length;
     const getGenderKorean = (gender) => {
         // react i18n -> 다국어 번역으로 하드코딩 하지말자;;
         switch(gender) {
@@ -92,6 +131,16 @@ const UserManagement = ({isOpen}) => {
         });
     };
 
+    const totalPages = Math.ceil(users.length / usersPerPage);
+    const indexOfLastUser = currentPage * usersPerPage;
+    const indexOfFirstUser = indexOfLastUser - usersPerPage;
+    const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
+
+    const handlePageChange = (newPage) => {
+        if(newPage < 1 || newPage > totalPages) return;
+        setCurrentPage(newPage);
+    }
+
     return (
         <Body isOpen={isOpen}>
             <h1>회원 관리</h1>
@@ -111,7 +160,7 @@ const UserManagement = ({isOpen}) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {users.map(user => (
+                        {currentUsers.map(user => (
                             <tr key={user.id}>
                                 <Td><input type="checkbox" checked={selectedUsers[user.id] || false} onChange={() => handleUserSelect(user.id)} /></Td>
                                 <Td>{user.id}</Td>
@@ -124,6 +173,22 @@ const UserManagement = ({isOpen}) => {
                     </tbody>
                 </Table>
             )}
+            {/* 디자인은 나중에 */}
+            {totalPages > 1 && (
+                        <Pagination>
+                            <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>이전</button>
+                            <span>{currentPage} / {totalPages}</span>
+                            <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>다음</button>
+                        </Pagination>
+            )}
+
+            <FixBar visible={selectedCount > 0} isOpen={isOpen}>
+                <ul>
+                    <li>관리자 지정</li>
+                    <li>회원 정보 변경</li>
+                    <li>회원 정보 삭제</li>
+                </ul>
+            </FixBar>
         </Body>
     );
 };
