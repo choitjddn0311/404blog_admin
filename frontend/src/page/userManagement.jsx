@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import moment from 'moment';
+import { GrFormPrevious } from "react-icons/gr";
+import { GrFormNext } from "react-icons/gr";
 
 const Body = styled.div`
     padding: 10px;
@@ -36,13 +38,55 @@ const FixBar = styled.div`
     position: fixed;
     bottom: 30px;
     width: ${(props) => (props.isOpen ? "80%" : "90%")};
-    height: 120px;
-    background: #fff;
+    height: 150px;
     box-shadow: 0 0 20px #eee;
     border-radius: 10px;
-    display: ${(props) => (props.visible ? 'block' : 'none')};
+    display: ${(props) => (props.visible ? 'flex' : 'none')};
+    flex-direction: column;
     z-index: 10;
+    overflow: hidden;
 `;
+
+const FixBarUserInfoCon = styled.ul`
+    width: 100%;
+    height: 50px;
+    display: flex;
+    justify-content: start;
+    gap: 20px;
+    align-items: center;
+    padding: 0 20px;
+    font-size: 20px;
+    color: #fff;
+    background: #111;
+`;
+
+const UserPermitControlContainer = styled.ul`
+    width: 100%;
+    height: 100px;
+    display: flex;
+    justify-content: start;
+    gap: 20px;
+    align-items: center;
+    padding: 0 20px;
+    background: #fff;
+`;
+
+const UserPermitControlBtn = styled.li`
+    width: 200px;
+    height: 50px;
+    border: 1px solid #111;
+    text-align: center;
+    align-content: center;
+    border-radius: 5px;
+    background: #fff;
+    color: #111;
+
+    &:hover {
+        background: #111;
+        color: #fff;
+        cursor: pointer;
+    }
+`
 
 const Pagination = styled.div`
     display: flex;
@@ -70,7 +114,7 @@ const UserManagement = ({isOpen}) => {
     const [selectAll, setSelectAll] = useState(false);
     const [selectedUsers, setSelectedUsers] = useState({});
     const [currentPage, setCurrentPage] = useState(1);
-    const usersPerPage = 7;
+    const usersPerPage = 10;
 
     const selectedCount = Object.values(selectedUsers).filter(Boolean).length;
     const getGenderKorean = (gender) => {
@@ -86,6 +130,60 @@ const UserManagement = ({isOpen}) => {
                 return '밝히고싶지않음';
         }
     }
+
+    const changeEtoK = (v) => {
+        switch(v) {
+            case 'admin':
+                return '관리자';
+            default:
+                return '일반';
+        }
+    }
+
+    const handleGrantAdmin = async () => {
+        const userIdsToUpdate = Object.entries(selectedUsers)
+            .filter(([userId, isSelected]) => isSelected)
+            .map(([userId]) => Number(userId)); // id는 숫자로 변환
+
+        if (userIdsToUpdate.length === 0) {
+            alert('선택된 사용자가 없습니다.');
+            return;
+        }
+
+        if (!window.confirm(`${userIdsToUpdate.length}명의 사용자에게 관리자 권한을 부여하시겠습니까?`)) {
+            return;
+        }
+
+        try {
+            const res = await fetch(`${process.env.REACT_APP_API_URL}/admin/updateUserRole`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userIds: userIdsToUpdate,
+                    newRole: 'admin',
+                }),
+            });
+
+            if (!res.ok) throw new Error('서버 응답 오류');
+
+            // 업데이트 성공 후 프론트 상태 반영
+            setUsers(prevUsers =>
+                prevUsers.map(user =>
+                    userIdsToUpdate.includes(user.id)
+                        ? { ...user, role: 'admin' }
+                        : user
+                )
+            );
+
+            alert('관리자 권한이 성공적으로 부여되었습니다.');
+        } catch (err) {
+            console.error(err);
+            alert('권한 부여 중 오류가 발생했습니다.');
+        }
+    };
+
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -153,6 +251,7 @@ const UserManagement = ({isOpen}) => {
                         <tr>
                             <Th><input type="checkbox" checked={selectAll} onChange={handleSelectAll} /></Th>
                             <Th>ID</Th>
+                            <Th>권한</Th>
                             <Th>이름</Th>
                             <Th>이메일</Th>
                             <Th>성별</Th>
@@ -164,6 +263,7 @@ const UserManagement = ({isOpen}) => {
                             <tr key={user.id}>
                                 <Td><input type="checkbox" checked={selectedUsers[user.id] || false} onChange={() => handleUserSelect(user.id)} /></Td>
                                 <Td>{user.id}</Td>
+                                <Td>{changeEtoK(user.role)}</Td>
                                 <Td>{user.name}</Td>
                                 <Td>{getGenderKorean(user.gender)}</Td>
                                 <Td>{user.email}</Td>
@@ -176,18 +276,27 @@ const UserManagement = ({isOpen}) => {
             {/* 디자인은 나중에 */}
             {totalPages > 1 && (
                         <Pagination>
-                            <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>이전</button>
+                            <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}><GrFormPrevious /></button>
                             <span>{currentPage} / {totalPages}</span>
-                            <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>다음</button>
+                            <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}><GrFormNext /></button>
                         </Pagination>
             )}
 
             <FixBar visible={selectedCount > 0} isOpen={isOpen}>
-                <ul>
-                    <li>관리자 지정</li>
-                    <li>회원 정보 변경</li>
-                    <li>회원 정보 삭제</li>
-                </ul>
+                <FixBarUserInfoCon>
+                    <li>{selectedCount}명</li> |
+                    {users
+                        .filter(user => selectedUsers[user.id])
+                        .map(user => (
+                            <li key={user.id}>
+                                <p>{user.id} 님</p>
+                            </li>
+                        ))
+                    }
+                </FixBarUserInfoCon>
+                <UserPermitControlContainer>
+                    <UserPermitControlBtn onClick={handleGrantAdmin}>관리자 권한 부여</UserPermitControlBtn>
+                </UserPermitControlContainer>
             </FixBar>
         </Body>
     );
