@@ -12,7 +12,7 @@ router.patch('/updateUserRole', async (req, res) => {
     try {
         // userIds 배열 길이만큼 ? 생성
         const placeholders = userIds.map(() => '?').join(',');
-        const sql = `UPDATE user SET role = ? WHERE id IN (${placeholders})`;
+        const sql = `UPDATE user SET role = ? WHERE idx IN (${placeholders})`;
         const values = [newRole, ...userIds];
 
         const [result] = await db.query(sql, values);

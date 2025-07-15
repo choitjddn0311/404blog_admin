@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import moment from 'moment';
-import { GrFormPrevious } from "react-icons/gr";
-import { GrFormNext } from "react-icons/gr";
+import { GrFormPrevious, GrFormNext } from "react-icons/gr";
 
 const Body = styled.div`
     padding: 10px;
@@ -86,7 +85,7 @@ const UserPermitControlBtn = styled.li`
         color: #fff;
         cursor: pointer;
     }
-`
+`;
 
 const Pagination = styled.div`
     display: flex;
@@ -106,8 +105,7 @@ const Pagination = styled.div`
     }
 `;
 
-
-const UserManagement = ({isOpen}) => {
+const UserManagement = ({ isOpen }) => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -117,9 +115,9 @@ const UserManagement = ({isOpen}) => {
     const usersPerPage = 10;
 
     const selectedCount = Object.values(selectedUsers).filter(Boolean).length;
+
     const getGenderKorean = (gender) => {
-        // react i18n -> 다국어 번역으로 하드코딩 하지말자;;
-        switch(gender) {
+        switch (gender) {
             case 'male':
                 return '남성';
             case 'female':
@@ -129,21 +127,23 @@ const UserManagement = ({isOpen}) => {
             default:
                 return '밝히고싶지않음';
         }
-    }
+    };
 
     const changeEtoK = (v) => {
-        switch(v) {
+        switch (v) {
             case 'admin':
                 return '관리자';
             default:
                 return '일반';
         }
-    }
+    };
 
     const handleGrantAdmin = async () => {
         const userIdsToUpdate = Object.entries(selectedUsers)
-            .filter(([userId, isSelected]) => isSelected)
-            .map(([userId]) => Number(userId)); // id는 숫자로 변환
+            .filter(([userIdx, isSelected]) => isSelected)
+            .map(([userIdx]) => Number(userIdx)); // idx 기반
+
+        console.log("보내는 userIdsToUpdate: ", userIdsToUpdate);
 
         if (userIdsToUpdate.length === 0) {
             alert('선택된 사용자가 없습니다.');
@@ -171,7 +171,7 @@ const UserManagement = ({isOpen}) => {
             // 업데이트 성공 후 프론트 상태 반영
             setUsers(prevUsers =>
                 prevUsers.map(user =>
-                    userIdsToUpdate.includes(user.id)
+                    userIdsToUpdate.includes(user.idx)
                         ? { ...user, role: 'admin' }
                         : user
                 )
@@ -184,7 +184,6 @@ const UserManagement = ({isOpen}) => {
         }
     };
 
-
     useEffect(() => {
         const fetchUsers = async () => {
             try {
@@ -195,7 +194,7 @@ const UserManagement = ({isOpen}) => {
 
                 const initialSelected = {};
                 data.forEach(user => {
-                    initialSelected[user.id] = false;
+                    initialSelected[user.idx] = false; // idx 기반
                 });
                 setSelectedUsers(initialSelected);
             } catch (err) {
@@ -214,15 +213,14 @@ const UserManagement = ({isOpen}) => {
         setSelectAll(newSelectAll);
         const updatedSelections = {};
         users.forEach(user => {
-            updatedSelections[user.id] = newSelectAll;
+            updatedSelections[user.idx] = newSelectAll;
         });
         setSelectedUsers(updatedSelections);
     };
 
-    // 각 체크박스 클릭 시 개별 토글
-    const handleUserSelect = (userId) => {
+    const handleUserSelect = (userIdx) => {
         setSelectedUsers(prev => {
-            const updated = { ...prev, [userId]: !prev[userId] };
+            const updated = { ...prev, [userIdx]: !prev[userIdx] };
             const allSelected = Object.values(updated).every(v => v);
             setSelectAll(allSelected);
             return updated;
@@ -235,9 +233,9 @@ const UserManagement = ({isOpen}) => {
     const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
 
     const handlePageChange = (newPage) => {
-        if(newPage < 1 || newPage > totalPages) return;
+        if (newPage < 1 || newPage > totalPages) return;
         setCurrentPage(newPage);
-    }
+    };
 
     return (
         <Body isOpen={isOpen}>
@@ -249,7 +247,13 @@ const UserManagement = ({isOpen}) => {
                 <Table>
                     <thead>
                         <tr>
-                            <Th><input type="checkbox" checked={selectAll} onChange={handleSelectAll} /></Th>
+                            <Th>
+                                <input
+                                    type="checkbox"
+                                    checked={selectAll}
+                                    onChange={handleSelectAll}
+                                />
+                            </Th>
                             <Th>ID</Th>
                             <Th>권한</Th>
                             <Th>이름</Th>
@@ -260,35 +264,45 @@ const UserManagement = ({isOpen}) => {
                     </thead>
                     <tbody>
                         {currentUsers.map(user => (
-                            <tr key={user.id}>
-                                <Td><input type="checkbox" checked={selectedUsers[user.id] || false} onChange={() => handleUserSelect(user.id)} /></Td>
+                            <tr key={user.idx}>
+                                <Td>
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedUsers[user.idx] || false}
+                                        onChange={() => handleUserSelect(user.idx)}
+                                    />
+                                </Td>
                                 <Td>{user.id}</Td>
                                 <Td>{changeEtoK(user.role)}</Td>
                                 <Td>{user.name}</Td>
-                                <Td>{getGenderKorean(user.gender)}</Td>
                                 <Td>{user.email}</Td>
-                                <Td>{moment(user.created_at).format('YYYY년 MM월 DD일 hh시 mm분 ss초')}</Td>
+                                <Td>{getGenderKorean(user.gender)}</Td>
+                                <Td>{moment(user.created_at).format('YYYY년 MM월 DD일 HH시 mm분 ss초')}</Td>
                             </tr>
                         ))}
                     </tbody>
                 </Table>
             )}
-            {/* 디자인은 나중에 */}
+
             {totalPages > 1 && (
-                        <Pagination>
-                            <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}><GrFormPrevious /></button>
-                            <span>{currentPage} / {totalPages}</span>
-                            <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}><GrFormNext /></button>
-                        </Pagination>
+                <Pagination>
+                    <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
+                        <GrFormPrevious />
+                    </button>
+                    <span>{currentPage} / {totalPages}</span>
+                    <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
+                        <GrFormNext />
+                    </button>
+                </Pagination>
             )}
 
             <FixBar visible={selectedCount > 0} isOpen={isOpen}>
                 <FixBarUserInfoCon>
                     <li>{selectedCount}명</li> |
                     {users
-                        .filter(user => selectedUsers[user.id])
+                        .filter(user => selectedUsers[user.idx])
                         .map(user => (
-                            <li key={user.id}>
+                            <li key={user.idx}>
                                 <p>{user.id} 님</p>
                             </li>
                         ))
