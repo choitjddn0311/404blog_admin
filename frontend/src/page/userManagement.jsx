@@ -150,6 +150,18 @@ const UserManagement = ({ isOpen }) => {
             return;
         }
 
+        const selectedUserInfo = users.filter(user => userIdsToUpdate.includes(user.idx));
+        const alreadyAdmins = selectedUserInfo.filter(user => user.role === 'admin');
+
+        if(alreadyAdmins.length === userIdsToUpdate.length) {
+            alert('이미 관리자로 지정된 사용자입니다.');
+            return;
+        }
+
+        const nonAdminUserIds = selectedUserInfo
+            .filter(user => user.role !== 'admin')
+            .map(user => user.idx)
+
         if (!window.confirm(`${userIdsToUpdate.length}명의 사용자에게 관리자 권한을 부여하시겠습니까?`)) {
             return;
         }
@@ -161,12 +173,12 @@ const UserManagement = ({ isOpen }) => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    userIds: userIdsToUpdate,
+                    userIds: nonAdminUserIds,
                     newRole: 'admin',
                 }),
             });
 
-            if (!res.ok) throw new Error('서버 응답 오류');
+            if (!res.ok) throw new Error( '서버 응답 오류');
 
             // 업데이트 성공 후 프론트 상태 반영
             setUsers(prevUsers =>
@@ -181,6 +193,74 @@ const UserManagement = ({ isOpen }) => {
         } catch (err) {
             console.error(err);
             alert('권한 부여 중 오류가 발생했습니다.');
+        } finally {
+            const clearedSelected = {};
+            users.forEach(user => {
+                clearedSelected[user.idx] = false;
+            });
+            setSelectedUsers(clearedSelected);
+            setSelectAll(false);
+        }
+    };
+
+    const handleRevokeAdmin = async () => {
+        const userIdsToUpdate = Object.entries(selectedUsers)
+            .filter(([userIdx, isSelected]) => isSelected)
+            .map(([userIdx]) => Number(userIdx)); // idx 기반
+
+        console.log("회수 대상 userIdsToUpdate: ", userIdsToUpdate);
+
+        if (userIdsToUpdate.length === 0) {
+            alert('선택된 사용자가 없습니다.');
+            return;
+        }
+
+        const selectedUserInfo = users.filter(user => userIdsToUpdate.includes(user.idx));
+        const notAdmins = selectedUserInfo.filter(user => user.role !== 'admin');
+
+        if (notAdmins.length > 0) {
+            alert('관리자가 아닌 사용자가 선택되어 있습니다.');
+            return;
+        }
+
+        if (!window.confirm(`${userIdsToUpdate.length}명의 사용자에게서 관리자 권한을 회수하시겠습니까?`)) {
+            return;
+        }
+
+        try {
+            const res = await fetch(`${process.env.REACT_APP_API_URL}/admin/updateUserRole`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userIds: userIdsToUpdate,
+                    newRole: 'user',
+                }),
+            });
+
+            if (!res.ok) throw new Error('서버 응답 오류');
+
+            // 업데이트 성공 후 프론트 상태 반영
+            setUsers(prevUsers =>
+                prevUsers.map(user =>
+                    userIdsToUpdate.includes(user.idx)
+                        ? { ...user, role: 'user' }
+                        : user
+                )
+            );
+
+            alert('관리자 권한이 성공적으로 회수되었습니다.');
+        } catch (err) {
+            console.error(err);
+            alert('권한 회수 중 오류가 발생했습니다.');
+        } finally {
+            const clearedSelected = {};
+            users.forEach(user => {
+                clearedSelected[user.idx] = false;
+            });
+            setSelectedUsers(clearedSelected);
+            setSelectAll(false);
         }
     };
 
@@ -310,6 +390,7 @@ const UserManagement = ({ isOpen }) => {
                 </FixBarUserInfoCon>
                 <UserPermitControlContainer>
                     <UserPermitControlBtn onClick={handleGrantAdmin}>관리자 권한 부여</UserPermitControlBtn>
+                    <UserPermitControlBtn onClick={handleRevokeAdmin}>관리자 권한 회수</UserPermitControlBtn>
                 </UserPermitControlContainer>
             </FixBar>
         </Body>
