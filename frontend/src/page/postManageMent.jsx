@@ -65,7 +65,7 @@ const PostManagement = ({isOpen}) => {
                 <Table>
                     <thead>
                         <tr>
-                            <Th>게시글 수</Th>
+                            <Th>게시글 관리 번호</Th>
                             <Th>작성자</Th>
                             <Th>제목</Th>
                             <Th>내용</Th>
@@ -79,13 +79,14 @@ const PostManagement = ({isOpen}) => {
                                 <Td>{post.id}</Td>
                                 <Td>{post.title}</Td>
                                 <Td>{post.post_text}</Td>
-                                <Td>{moment(post.created_at).format('YYYY년 MM월 DD일 hh시 mm분 ss초')}</Td>
+                                <Td>{moment(post.created_at).format('YYYY-MM-DD hh:mm')}</Td>
                             </tr>
                         ))}
                     </tbody>
                 </Table>
             )}
         </Body>
+        
     );
 };
 

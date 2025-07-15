@@ -357,7 +357,7 @@ const UserManagement = ({ isOpen }) => {
                                 <Td>{changeEtoK(user.role)}</Td>
                                 <Td>{user.email}</Td>
                                 <Td>{getGenderKorean(user.gender)}</Td>
-                                <Td>{moment(user.created_at).format('YYYY년 MM월 DD일 HH시 mm분 ss초')}</Td>
+                                <Td>{moment(user.created_at).format('YYYY-MM-DD HH:mm')}</Td>
                             </tr>
                         ))}
                     </tbody>
