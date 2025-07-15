@@ -335,8 +335,8 @@ const UserManagement = ({ isOpen }) => {
                                 />
                             </Th>
                             <Th>ID</Th>
-                            <Th>권한</Th>
                             <Th>이름</Th>
+                            <Th>권한</Th>
                             <Th>이메일</Th>
                             <Th>성별</Th>
                             <Th>가입일</Th>
@@ -353,8 +353,8 @@ const UserManagement = ({ isOpen }) => {
                                     />
                                 </Td>
                                 <Td>{user.id}</Td>
-                                <Td>{changeEtoK(user.role)}</Td>
                                 <Td>{user.name}</Td>
+                                <Td>{changeEtoK(user.role)}</Td>
                                 <Td>{user.email}</Td>
                                 <Td>{getGenderKorean(user.gender)}</Td>
                                 <Td>{moment(user.created_at).format('YYYY년 MM월 DD일 HH시 mm분 ss초')}</Td>
