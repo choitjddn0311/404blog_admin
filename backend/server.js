@@ -25,5 +25,5 @@ app.use('/admin' , updateUserRoute);
 
 
 app.listen(port , '0.0.0.0' , () => {
-    console.log(`${port}포트에서 돌아가는중`)
+    // console.log(`${port}포트에서 돌아가는중`)
 })
