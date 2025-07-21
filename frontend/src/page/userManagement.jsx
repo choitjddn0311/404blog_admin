@@ -34,7 +34,7 @@ const Td = styled.td`
 `;
 
 const FixBar = styled.div`
-    position: fixed;
+    position: absolute;
     bottom: 30px;
     width: ${(props) => (props.isOpen ? "80%" : "90%")};
     height: 150px;
@@ -57,6 +57,7 @@ const FixBarUserInfoCon = styled.ul`
     font-size: 20px;
     color: #fff;
     background: #111;
+    overflow-x: hidden;
 `;
 
 const UserPermitControlContainer = styled.ul`
@@ -90,16 +91,15 @@ const UserPermitControlBtn = styled.li`
 const Pagination = styled.div`
     display: flex;
     gap: 5px;
-    margin-top: 10px;
     justify-content: center;
     align-items: center;
     button {
-        padding: 5px 10px;
         border: none;
-        background: #ddd;
+        color: #111;
         cursor: pointer;
+        font-size: 18px;
         &:disabled {
-            background: #aaa;
+            color: #aaa;
             cursor: not-allowed;
         }
     }
@@ -383,7 +383,7 @@ const UserManagement = ({ isOpen }) => {
                         .filter(user => selectedUsers[user.idx])
                         .map(user => (
                             <li key={user.idx}>
-                                <p>{user.id} 님</p>
+                                <p>{user.id}</p>
                             </li>
                         ))
                     }
